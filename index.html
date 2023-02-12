@@ -1,12 +1,40 @@
-<!-- index.html-->
 <!DOCTYPE html>
-<html>
- <head>
-  <title>Fiona personal page</title>
- <head>
- <body>
-  <h3>Fiona Chong</h3> 
-  <a href=''>About me</a>
-  <img src='IMG_3875.jpg' height="300" weight="200">
- </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+        Please input score: <input type="text" id="num"> 
+        <button type="button" onclick="addScore()">Add a Score</button>
+        <p id="entered"></p>
+        <button type="button" onclick="displayAll()">Display all scores</button>
+        <p id="displayAll"></p>
+        <button type="button" onclick="totalScore()">Calculate Score Total</button>
+        <p id="totalScore"></p>
+        <button type="button"onclick="averageScore()">Calculate Average Score</button>
+        <p id="averageScore"></p>
+</body>
+<script>
+    const array=[];
+    let sum = 0;
+    function addScore(){
+        var num = document.getElementById("num").value;
+        array.push(Number(num));
+        sum += Number(num);
+        document.getElementById("entered").innerHTML="You entered:"+num;
+    }
+    function displayAll(){
+        document.getElementById("displayAll").innerHTML="You have entered these scores:"+array;
+    }
+    function totalScore(){
+        document.getElementById("totalScore").innerHTML="The total input score is:"+sum;
+    }
+    function averageScore(){
+        let i = array.length;
+        document.getElementById("averageScore").innerHTML="The total input score is:"+sum/i;
+    }
+</script>
 </html>
