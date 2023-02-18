@@ -1,0 +1,33 @@
+﻿{% extends "/bootstrap/baseCustomer.html" %}
+{% block title %}Product{% endblock %}
+{% block content %}
+<h2>Product</h2><br>
+<div class="grid-container">
+    <div class="grid-item">
+        <img src="{{url_for('static',filename='routeSystem.png')}}" class="demo_pic_small" />
+        <p><label class="btn" for="Route System">Route System</label></p>
+    </div>
+    <div class="grid-item">
+        <img src="{{url_for('static',filename='routeSystem.png')}}" class="demo_pic_small" />
+        <p><label class="btn" for="modal-1">ABC System</label></p>
+    </div>
+</div>
+<input class="modal-state" id="Route System" type="checkbox" />
+<div class="modal">
+    <label class="modal__bg" for="Route System"></label>
+    <div class="modal__inner">
+        <label class="modal__close" for="Route System"></label>
+        <h2>Route System</h2>
+        <img src="{{url_for('static',filename='routeSystem.png')}}" class="demo_pic_big" /><br clear="all">
+        <p>Description: <br /> Price: $1 per day </p> <br>
+        <div class="fill-in">
+            <form>
+                <label for="day">Days</label>
+                <input type="number" name="days" min="1" required /><br>
+                <input type="submit" value="Add to cart" />
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

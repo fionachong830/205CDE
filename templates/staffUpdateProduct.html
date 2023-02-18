@@ -1,0 +1,30 @@
+﻿{% extends "/bootstrap/baseStaff.html" %}
+{% block title %}Update Product{% endblock %}
+{% block content %}
+<h2>Update Product</h2><br>
+<a href="/staff/addProduct"> Add New Product </a>
+<div class="grid-container">
+    <div class="grid-item">
+        <img src="{{url_for('static',filename='routeSystem.png')}}" class="demo_pic_small" />
+        <p><label class="btn" for="Route System">Route System</label></p>
+    </div>
+    <div class="grid-item">
+        <img src="{{url_for('static',filename='routeSystem.png')}}" class="demo_pic_small" />
+        <p><label class="btn" for="modal-1">ABC System</label></p>
+    </div>
+</div>
+<input class="modal-state" id="Route System" type="checkbox" />
+<div class="modal">
+    <label class="modal__bg" for="Route System"></label>
+    <div class="modal__inner">
+        <label class="modal__close" for="Route System"></label>
+        <h2>Route System</h2>
+        <p>
+            Name: Route System <button onclick="edit('Route system')">Edit</button><br /> 
+            Picture: routeSystem.png <button onclick="edit()">Edit</button><br /> 
+            Description: <button onclick="edit()">Edit</button><br /> 
+            Price: $1 per day <button onclick="edit()">Edit</button><br /> 
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+﻿{% extends "/bootstrap/base.html" %}
+{% block title %}Account Registration{% endblock %}
+{% block content %}
+<h2>Welcome to Online Subscription Website ^ ^</h2><br>
+<div class="fill-in">
+    <form>
+        <h2>Account Registration</h2>
+        <label for="name">Name</label>
+        <input type="text" id="name" required> <br>
+        <label for="phoneNum">Phone Number</label>
+        <input type="tel" id="phoneNum" required> <br>
+        <label for="email">Email</label>
+        <input type="email" id="email" required> <br>
+        <label for="userName">User Name</label>
+        <input type="text" id="userName" required> <br>
+        <label for="password">Password</label>
+        <input type="password" id="password" required> <br>
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" required> <br>
+        <input type="checkbox" id="t&c" required> <a href="#">Terms and Conditions</a><br>
+        <input type="submit" value="Submit">
+    </form>
+</div>
+{% endblock %}

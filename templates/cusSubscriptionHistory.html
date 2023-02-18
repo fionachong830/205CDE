@@ -1,0 +1,33 @@
+﻿{% extends "/bootstrap/baseCustomer.html" %}
+{% block title %}Subscription History{% endblock %}
+{% block content %}
+<h2>Subscription History</h2><br>
+<table>
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Product</th>
+        <th>Period</th>
+        <th>Status</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Confirm Date</th>
+        <th>Price</th>
+        <th>Upload Document</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Route System</td>
+        <td>5 Days</td>
+        <td>Approved</td>
+        <td>1-Jan-23</td>
+        <td>5-Jan-23</td>
+        <td>1-Jan-23</td>
+        <td>$ 5</td>
+        <td><a href="/customer/uploadDocument"> Upload </a></td>
+      </tr>
+    </tbody>
+</table>
+{% endblock %}

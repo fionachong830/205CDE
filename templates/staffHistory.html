@@ -1,0 +1,33 @@
+﻿{% extends "/bootstrap/baseStaff.html" %}
+{% block title %}History{% endblock %}
+{% block content %}
+<h2>Subscription History</h2><br>
+<table>
+    <thead>
+      <tr>
+        <th>User ID</th>
+        <th>Order ID</th>
+        <th>Product</th>
+        <th>Period</th>
+        <th>Status</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Confirm Date</th>
+        <th>Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>00000001</td>
+        <td>1</td>
+        <td>Route System</td>
+        <td>5 Days</td>
+        <td>Approved</td>
+        <td>1-Jan-23</td>
+        <td>5-Jan-23</td>
+        <td>1-Jan-23</td>
+        <td>$ 5</td>
+      </tr>
+    </tbody>
+</table>
+{% endblock %}

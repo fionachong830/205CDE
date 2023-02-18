@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %} - Online Subscription</title>
+        <link rel="stylesheet" href="{{url_for('static',filename='StyleSheet1.css')}}">
+    </head>
+    <body>
+        <div class="header">
+            <nav>
+                <img src="{{url_for('static',filename='logo.png')}}" class="logo" />
+                <ul>
+                    <li> <a href="/product"> Product </a></li>
+                    {% block navbar %}{% endblock %}
+                </ul>
+                <div class="user-name" onclick="toggleMenu()">G</div>
+                <div class="sub-menu-wrap" id="subMenu">
+                    <div class="sub-menu">
+                        <div class="user-info">
+                            <div class="user-name">G</div>
+                            <h3> Guest 123 </h3>
+                        </div>
+                        <hr>
+                        <a href="/signup" class="sub-menu-link">
+                            <p>Sign Up</p>
+                            <span> > </span>
+                        </a>
+                        <a href="/login" class="sub-menu-link">
+                            <p>Login</p>
+                            <span> > </span>
+                        </a>
+                        <a href="/forgotPassword" class="sub-menu-link">
+                            <p>Forgot Password</p>
+                            <span> > </span>
+                        </a>
+                </div>
+            </nav>
+            <div class="content">
+                {% block content %}{% endblock %} 
+            </div>
+        </div>
+        <script>
+            let subMenu = document.getElementById("subMenu");
+
+            function toggleMenu() {
+                subMenu.classList.toggle("open-menu");
+            }
+
+            function sendemail(){
+                let text="A email will send to you later.";
+                document.getElementById("message").innerHTML = text;    
+            }
+        </script>
+    </body>
+</html>

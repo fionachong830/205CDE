@@ -1,0 +1,18 @@
+﻿{% extends "/bootstrap/baseCustomer.html" %}
+{% block title %}Help and Support{% endblock %}
+{% block content %}
+<h2>Help and Support</h2><br>
+<div class="fill-in">
+    <form>
+        <label for="session" id="session">Catageries</label>
+        <select name="session" id="session">
+            <option value="customer">Customer</option>
+            <option value="staff">Staff</option>
+        </select> <br>
+        <label for="question">Questions</label>
+        <input type="text" id="question" required> <br>
+        <input type="submit" value="Submit">
+    </form>
+</div>
+{% endblock %}
+

@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %} - Customer</title>
+        <link rel="stylesheet" href="{{url_for('static',filename='StyleSheet1.css')}}">
+    </head>
+    <body>
+        <div class="header">
+            <nav>
+                <img src="{{url_for('static',filename='logo.png')}}" class="logo" />
+                <ul>
+                    <li> <a href="/customer/dashboard"> Dashboard </a></li>
+                    <li> <a href="/customer/product"> Product </a></li>
+                    <li> <a href="/customer/subscriptionHistory"> Subscription History </a></li>
+                    <li> <a href="/customer/uploadDocument"> Upload Document </a></li>
+                    {% block navbar %}{% endblock %}
+                </ul>
+                <div class="user-name" onclick="toggleMenu()">T</div>
+                <a href="/customer/shoppingCart"><img src="{{url_for('static',filename='shoppingCart.png')}}" class="smallLogo"/></a>
+                <div class="sub-menu-wrap" id="subMenu">
+                    <div class="sub-menu">
+                        <div class="user-info">
+                            <div class="user-name">T</div>
+                            <h3> Testing123 </h3>
+                        </div>
+                        <hr>
+                        <a href="/customer/personalInfo" class="sub-menu-link">
+                            <p>Edit Profile</p>
+                            <span> > </span>
+                        </a>
+                        <a href="/customer/changePassword" class="sub-menu-link">
+                            <p>Change Password</p>
+                            <span> > </span>
+                        </a>
+                        <a href="/customer/helpSupport" class="sub-menu-link">
+                            <p>Help & Support</p>
+                            <span> > </span>
+                        </a>
+                        <a href="/logout" class="sub-menu-link">
+                            <p>Logout</p>
+                            <span> > </span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            <div class="content">
+                {% block content %}{% endblock %} 
+            </div>
+        </div>
+        <script>
+            let subMenu = document.getElementById("subMenu");
+
+            function toggleMenu() {
+                subMenu.classList.toggle("open-menu");
+            }
+
+            function confirmFunction(){
+                let text;
+                if (confirm("Are you sure to confirm?") == true) {
+                    text = "Please upload the payment document in the upload document page.";
+                } else {
+                    text = "Canceled";
+                }
+                document.getElementById("message").innerHTML = text;
+            }
+        </script>
+        {% block script %}{% endblock %} 
+    </body>
+</html>

@@ -1,0 +1,31 @@
+﻿{% extends "/bootstrap/baseStaff.html" %}
+{% block title %}Approver Corner{% endblock %}
+{% block content %}
+<h2>Approver Corner</h2><br>
+<table>
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Order ID</th>
+            <th>Total</th>
+            <th>Document</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>    
+        <tr>
+            <td>00000001</td>
+            <td>00000001</td>
+            <td>$ 5</td>
+            <td><a href="document01">view</td>
+            <td>            
+                <form class="inheritall">
+                    <input class="inheritall" type="submit" id="approve" value="Approve">
+                    <input class="inheritall" type="submit" id="reject" value="Reject">
+                    <input class="inheritall" type="submit" id="return" value="Return">
+                </form>
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

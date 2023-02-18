@@ -1,0 +1,41 @@
+﻿{% extends "/bootstrap/baseStaff.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h2>Staff Dashboard</h2>
+<h4>Hi Staff 123,</h4><br>
+    <table>
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Product</th>
+                <th>Subscription End Date</th>
+                <th>Remaining</th>
+                <th>Extend</th>
+            </tr>
+        </thead>
+        <tbody>    
+            <tr>
+                <td>00000001</td>
+                <td>Route System</td>
+                <td>20 Jan 2023</td>
+                <td>6 Days</td>
+                <td><label class="btn" for="Route System">Extend</label></td>
+            </tr>
+        </tbody>
+    </table>
+    <input class="modal-state" id="Route System" type="checkbox" />
+    <div class="modal">
+        <label class="modal__bg" for="Route System"></label>
+        <div class="modal__inner">
+            <label class="modal__close" for="Route System"></label>
+            <h2>Route System for {userid}</h2>
+            <div class="fill-in">    
+                <form>
+                    <label for="days">Days</label> 
+                    <input type="number" name="days" min="1" required /><br>
+                    <input type="submit" value="Confirm" />
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
