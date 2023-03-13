@@ -508,6 +508,7 @@ def staffUpdateProductSubmitPic(id):
     if checkLoginStatus(id) == True:
         user = getUserInfo(id)
         UPLOAD_FOLDER = '/Users/fionachong/Library/CloudStorage/OneDrive-個人/2223 Sem2/205CDE/205CDE VS/tryflask/static/product'
+        UPLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\product")
         app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         if request.method == 'POST':
             prodID = request.form['prodID']
@@ -535,6 +536,7 @@ def staffAddProductSubmit(id):
     if checkLoginStatus(id) == True:
         user = getUserInfo(id)
         UPLOAD_FOLDER = '/Users/fionachong/Library/CloudStorage/OneDrive-個人/2223 Sem2/205CDE/205CDE VS/tryflask/static/product'
+        UPLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\product")
         app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         if request.method == 'POST':
             productName = request.form['productName']
