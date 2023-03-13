@@ -287,6 +287,7 @@ def cusUploadDocument(id):
 def cusUploadDocumentSubmit(id):
     if checkLoginStatus(id) == True:  
         UPLOAD_FOLDER = '/Users/fionachong/Library/CloudStorage/OneDrive-個人/2223 Sem2/205CDE/205CDE VS/tryflask/static/uploadDoc'
+        UPLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\uploadDoc")
         app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         user = getUserInfo(id)
         if request.method == 'POST':
@@ -478,6 +479,7 @@ def staffUpdateProductSubmit(id):
     if checkLoginStatus(id) == True:
         user = getUserInfo(id)
         UPLOAD_FOLDER = '/Users/fionachong/Library/CloudStorage/OneDrive-個人/2223 Sem2/205CDE/205CDE VS/tryflask/static/product'
+        UPLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\product")
         app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         if request.method == 'POST':
             prodID = request.form['prodID']
