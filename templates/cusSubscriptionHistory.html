@@ -17,17 +17,19 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td>1</td>
-        <td>Route System</td>
-        <td>5 Days</td>
-        <td>Approved</td>
-        <td>1-Jan-23</td>
-        <td>5-Jan-23</td>
-        <td>1-Jan-23</td>
-        <td>$ 5</td>
-        <td><a href="/customer/uploadDocument"> Upload </a></td>
-      </tr>
+      {% for items in data %}
+        <tr>
+          <td>{{items.subHID}}</td>
+          <td>{{items.productName}}</td>
+          <td>{{items.subHDay}} Days</td>
+          <td>{{items.subHstatus}}</td>
+          <td>{{items.subHStart}}</td>
+          <td>{{items.subHEnd}}</td>
+          <td>{{items.confirmDate}}</td>
+          <td>$ {{items.subAmount}}</td>
+          <td><a href="/customer/{{items.userID}}/uploadDocument/{{items.payID}}"> Upload </a></td>
+        </tr>        
+      {% endfor %}
     </tbody>
 </table>
 {% endblock %}

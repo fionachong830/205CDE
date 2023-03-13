@@ -1,0 +1,49 @@
+﻿{% extends "/bootstrap/baseCustomer.html" %}
+{% block title %}Payment Details{% endblock %}
+{% block content %}
+<h2>Payment Details</h2><br>
+<table>
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Product</th>
+        <th>Period</th>
+        <th>Status</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Confirm Date</th>
+        <th>Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for items in data %}
+        <tr>
+          <td>{{items.subHID}}</td>
+          <td>{{items.productName}}</td>
+          <td>{{items.subHDay}} Days</td>
+          <td>{{items.subHstatus}}</td>
+          <td>{{items.subHStart}}</td>
+          <td>{{items.subHEnd}}</td>
+          <td>{{items.confirmDate}}</td>
+          <td>$ {{items.subAmount}}</td> 
+        </tr>        
+      {% endfor %}
+    </tbody>
+</table>
+<div class="fill-in">
+  {% for info in user %}
+  <form action="/customer/{{info.userID}}/uploadDocument/submit" method="post" enctype="multipart/form-data">
+  {% endfor %}
+    <label for="payID">Payment ID</label>
+        <select name="payID" id="payID">
+          {% for items in data %}
+            <option value="{{items.payID}}">{{items.payID}}</option>
+          {% endfor %} 
+        </select><br>
+        <label for="payDoc">Upload Document</label>
+        <input type="file" name="payDoc" required> <br>
+        <input type="button" value="Back" onclick="history.back()"><br>
+        <input type="submit" value="Submit" />
+  </form>
+</div>
+{% endblock %}

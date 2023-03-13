@@ -2,43 +2,44 @@
 {% block title %}Upload Document{% endblock %}
 {% block content %}
 <h2>Upload Document</h2><br>
-<h4>Orders:</h4>
+<h4>Pending for Payment Orders:</h4>
 <table>
     <thead>
       <tr>
-        <th>Order ID</th>
+        <th>Payment ID</th>
         <th>Status</th>
         <th>Total</th>
+        <th>Details</th>
       </tr>
     </thead>
     <tbody>
+      {% for items in data %}
       <tr>
-        <td>3</td>
-        <td>Pending for Re-upload </td>
-        <td>$5</td>
+        <td>{{items.payID}}</td>
+        <td>{{items.payStatus}}</td>
+        <td>$ {{items.payAmount}}</td>
+        <td><a href="/customer/{{items.userID}}/uploadDocument/{{items.payID}}"> Details </a></td>
       </tr>
-      <tr>
-        <td>4</td>
-        <td>Pending for Approval</td>
-        <td>$5</td>
-      </tr>
-      <tr>
-        <td>5</td>
-        <td>Pending for Payment</td>
-        <td>$10</td>
-      </tr>
+      {% endfor %} 
     </tbody>
 </table><br>
 <div class="fill-in">
-    <form action="function.py" method="post">
-        <label for="orderID">Order ID</label>
-        <select name="orderID" id="orderID">
-            <option value="1">1</option>
+  {% for info in user %}
+  <form action="/customer/{{info.userID}}/uploadDocument/submit" method="post" enctype="multipart/form-data">
+  {% endfor %}
+    <label for="payID">Payment ID</label>
+        <select name="payID" id="payID">
+          {% for items in data %}
+            <option value="{{items.payID}}">{{items.payID}}</option>
+          {% endfor %} 
         </select><br>
-        <label for="upload">Upload Document</label>
-        <input type="file" id="picture" required> <br>
+        <label for="payDoc">Upload Document</label>
+        <input type="file" name="payDoc" required> <br>
         <input type="submit" value="Submit" />
-    </form>
+  </form>
 </div>
+{% if status == 'success' %}
+Upload successfully
+{% endif %}
 {% endblock %}
 

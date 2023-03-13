@@ -2,7 +2,9 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <h2>Staff Dashboard</h2>
-<h4>Hi Staff 123,</h4><br>
+{% for info in user%}
+<h4>Hi {{info.name}}, <br> <br>Customer subscription records</h4>
+{% endfor %}
     <table>
         <thead>
             <tr>
@@ -11,26 +13,37 @@
                 <th>Subscription End Date</th>
                 <th>Remaining</th>
                 <th>Extend</th>
+                <th>History</th>
             </tr>
         </thead>
         <tbody>    
+            {% for items in data %} 
             <tr>
-                <td>00000001</td>
-                <td>Route System</td>
-                <td>20 Jan 2023</td>
-                <td>6 Days</td>
-                <td><label class="btn" for="Route System">Extend</label></td>
-            </tr>
+              <td>{{items.userID}}</td>
+              <td>{{items.productName}}</td>
+              <td>{{items.subEnd}}</td>
+              <td>{{items.remaining}} Days</td>
+              <td><label class="btn" for="{{items.productName}}.{{items.userID}}">Extend</label></td>
+              {% for info in user%}
+              <td><a href="/staff/{{info.userID}}/dashboard/{{items.userID}}/{{items.prodID}}"> Details </a></td>
+              {% endfor %}
+            </tr>        
+            {% endfor %}
         </tbody>
     </table>
-    <input class="modal-state" id="Route System" type="checkbox" />
+    {% for items in data %}
+    <input class="modal-state" id="{{items.productName}}.{{items.userID}}" type="checkbox" />
     <div class="modal">
-        <label class="modal__bg" for="Route System"></label>
+        <label class="modal__bg" for="{{items.productName}}.{{items.userID}}"></label>
         <div class="modal__inner">
-            <label class="modal__close" for="Route System"></label>
-            <h2>Route System for {userid}</h2>
+            <label class="modal__close" for="{{items.productName}}.{{items.userID}}"></label>
+            <h2>Route System for {{items.userName}} ({{items.userID}})</h2>
             <div class="fill-in">    
-                <form>
+                {% for info in user%}
+                <form action="/staff/{{info.userID}}/buy" method="post">
+                {% endfor %}
+                    <input type="hidden" name="userID" value={{items.userID}}>
+                    <input type="hidden" name="prodID" value={{items.prodID}}>
                     <label for="days">Days</label> 
                     <input type="number" name="days" min="1" required /><br>
                     <input type="submit" value="Confirm" />
@@ -38,4 +51,5 @@
             </div>
         </div>
     </div>
+    {% endfor %} 
 {% endblock %}

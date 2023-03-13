@@ -8,24 +8,51 @@
             <th>User ID</th>
             <th>Order ID</th>
             <th>Total</th>
+            <th>Status</th>
             <th>Document</th>
             <th>Action</th>
         </tr>
     </thead>
     <tbody>    
+        {% for items in data %}
         <tr>
-            <td>00000001</td>
-            <td>00000001</td>
-            <td>$ 5</td>
-            <td><a href="document01">view</td>
-            <td>            
-                <form class="inheritall">
-                    <input class="inheritall" type="submit" id="approve" value="Approve">
-                    <input class="inheritall" type="submit" id="reject" value="Reject">
-                    <input class="inheritall" type="submit" id="return" value="Return">
-                </form>
-            </td>
+          <td>{{items.userID}}</td>
+          <td>{{items.payID}}</td>
+          <td>$ {{items.payAmount}}</td>
+          <td>{{items.payStatus}}</td>
+          <td><label class="btn" for="{{items.payID}}">View</label></td>
+          <td>
+            {% for info in user%}
+            <form action="/staff/{{info.userID}}/approverCorner/submit" method="post">
+                <input type="hidden" name="payID" value={{items.payID}} />
+                <input type="hidden" name="status" value="Approved" />
+                <input class="btn" type="submit" value="Approve" />
+            </form>
+            <form action="/staff/{{info.userID}}/approverCorner/submit" method="post">
+                <input type="hidden" name="payID" value={{items.payID}} />
+                <input type="hidden" name="status" value="Rejected" />
+                <input class="btn" type="submit" value="Reject" />
+            </form>
+            <form action="/staff/{{info.userID}}/approverCorner/submit" method="post">
+                <input type="hidden" name="payID" value={{items.payID}} />
+                <input type="hidden" name="status" value="Returned" />
+                <input class="btn" type="submit" value="Return" />
+            </form>
+            {% endfor %}
+          </td>
         </tr>
+        {% endfor %}
     </tbody>
 </table>
+{% for items in data %}
+    <input class="modal-state" id="{{items.payID}}" type="checkbox" />
+    <div class="modal">
+        <label class="modal__bg" for="{{items.payID}}"></label>
+        <div class="modal__inner">
+            <label class="modal__close" for="{{items.payID}}"></label>
+            <h2>{{items.productName}}</h2>
+            <img src="/static/uploadDoc/{{items.payDoc}}" class="demo_pic_big" /><br clear="all">
+        </div>
+    </div>    
+{% endfor %}
 {% endblock %}

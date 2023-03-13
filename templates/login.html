@@ -3,22 +3,23 @@
 {% block content %}
 <h2>Welcome to Online Subscription Website ^ ^</h2><br>
 <div class="fill-in">
-    <form>
+    <form action="/login" method="post">
         <h2>Login</h2>
         <label for="accType" id="accType">Login as</label>
-        <select name="accType" id="accType">
-            <option value="customer">Customer</option>
-            <option value="staff">Staff</option>
+        <select id="accType" name="accType">
+            <option value="C">Customer</option>
+            <option value="S">Staff</option>
         </select> <br>
         <label for="userName">User Name</label>
-        <input type="text" id="userName" required> <br>
+        <input type="text" name="userName" required> <br>
         <label for="password">Password</label>
-        <input type="password" id="password" required> <br>
+        <input type="password" name="password" required> <br>
         <input type="submit" value="Login"> <br>
         <a href="/forgotPassword"> Forgot password </a> <br>
         <a href="/signup"> Sign up </a> <br>
-        <a href="/customer/dashboard">Login Customer</a>
-        <a href="/staff/dashboard">Login Staff</a>
     </form>
 </div>
+{% if status == 'fail' %}
+Your username or password is not correct.
+{% endif %}
 {% endblock %}

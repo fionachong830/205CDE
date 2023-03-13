@@ -2,7 +2,9 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <h2>Dashboard</h2>
-<h4>Hi Testing 123,</h4><br>
+{% for info in user%}
+<h4>Hi {{info.name}},</h4><br>
+{% endfor %}
 <table>
     <thead>
         <tr>
@@ -10,32 +12,43 @@
             <th>Subscription End Date</th>
             <th>Remaining</th>
             <th>Extend</th>
+            <th>History</th>
         </tr>
     </thead>
     <tbody>    
+        {% for items in data %}
         <tr>
-            <td>Route System</td>
-            <td>20 Jan 2023</td>
-            <td>6 Days</td>
-            <td><label class="btn" for="Route System">Extend</label></td>
-        </tr>
+          <td>{{items.productName}}</td>
+          <td>{{items.subEnd}}</td>
+          <td>{{items.remaining}} Days</td>
+          <td><label class="btn" for="{{items.productName}}">Extend</label></td>
+          {% for info in user%}
+          <td><a href="/customer/{{info.userID}}/dashboard/{{items.prodID}}"> Details </a></td>
+          {% endfor %}
+        </tr>        
+        {% endfor %}
     </tbody>
 </table>
-<input class="modal-state" id="Route System" type="checkbox" />
-<div class="modal">
-    <label class="modal__bg" for="Route System"></label>
-    <div class="modal__inner">
-        <label class="modal__close" for="Route System"></label>
-        <h2>Route System</h2>
-        <img src="{{url_for('static',filename='routeSystem.png')}}" class="demo_pic_big" /><br clear="all">
-        <p>Description: <br /> Price: $1 per day </p> <br>
-        <div class="fill-in">
-            <form>
-                <label for="day">Days</label>
-                <input type="number" name="days" min="1" required /><br>
-                <input type="submit" value="Add to cart" />
-            </form>
+{% for items in product %}
+    <input class="modal-state" id="{{items.productName}}" type="checkbox" />
+    <div class="modal">
+        <label class="modal__bg" for="{{items.productName}}"></label>
+        <div class="modal__inner">
+            <label class="modal__close" for="{{items.productName}}"></label>
+            <h2>{{items.productName}}</h2>
+            <img src="/static/product/{{items.prodImg}}" class="demo_pic_big" /><br clear="all">
+            <p>Description: {{items.prodDescr}}<br /> Price: $ {{items.prodPrice}} per day </p> <br>
+            <div class="fill-in">
+                {% for info in user %}
+                <form action="/customer/{{info.userID}}/dashboard" method="post">
+                {% endfor %} 
+                    <input type="hidden" name="prodID" value={{items.prodID}}>
+                    <label for="day">Days</label>
+                    <input type="number" name="days" min="1" required /><br>
+                    <input type="submit" value="Add to cart" />
+                </form>
+            </div>
         </div>
-    </div>
-</div>            
+    </div>    
+{% endfor %}        
 {% endblock %}

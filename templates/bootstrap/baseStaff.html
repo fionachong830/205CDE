@@ -5,31 +5,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %} - Staff</title>
         <link rel="stylesheet" href="{{url_for('static',filename='StyleSheet1.css')}}">
+
     </head>
     <body>
+        {% for info in user %}
         <div class="header">
             <nav>
                 <img src="{{url_for('static',filename='logo.png')}}" class="logo" />
                 <ul>
-                    <li> <a href="/staff/dashboard"> Dashboard </a></li>
-                    <li> <a href="/staff/updateProduct"> Update Product </a></li>
-                    <li> <a href="/staff/approverCorner"> Approver Corner </a></li>
-                    <li> <a href="/staff/addAccount"> Add Account </a></li>
-                    <li> <a href="/staff/history"> History </a></li>
+                    <li> <a href="/staff/{{info.userID}}/dashboard"> Dashboard </a></li>
+                   <li> <a href="/staff/{{info.userID}}/updateProduct"> Update Product </a></li>
+                    <li> <a href="/staff/{{info.userID}}/approverCorner"> Approver Corner </a></li>
+                    <li> <a href="/staff/{{info.userID}}/addAccount"> Add Account </a></li>
+                    <li> <a href="/staff/{{info.userID}}/history"> History </a></li>
                 </ul>
-                <div class="user-name" onclick="toggleMenu()">S</div>
+                Balance: ${{info.money}}
+                <div class="user-name" onclick="toggleMenu()">{{info.sName}}</div>
                 <div class="sub-menu-wrap" id="subMenu">
                     <div class="sub-menu">
                         <div class="user-info">
-                            <div class="user-name">S</div>
-                            <h3> Staff 123 </h3>
+                            <div class="user-name">{{info.sName}}</div>
+                            <h3> {{info.name}} </h3>
                         </div>
                         <hr>
-                        <a href="/staff/personalInfo" class="sub-menu-link">
+                        <a href="/staff/{{info.userID}}/personalInfo" class="sub-menu-link">
                             <p>Edit Profile</p>
                             <span> > </span>
                         </a>
-                        <a href="/staff/changePassword" class="sub-menu-link">
+                        <a href="/staff/{{info.userID}}/changePassword" class="sub-menu-link">
                             <p>Change Password</p>
                             <span> > </span>
                         </a>
@@ -44,16 +47,17 @@
                 {% block content %}{% endblock %} 
             </div>
         </div>
+        {% endfor %}
             <script>
             let subMenu = document.getElementById("subMenu");
 
             function toggleMenu() {
                 subMenu.classList.toggle("open-menu");
             }
-
             function edit(x) {
                 let message = prompt("Please input the updated information",x)
             }
         </script>
+        {% block script %}{% endblock %} 
     </body>
 </html>
