@@ -225,6 +225,9 @@ def cusProduct(id):
 def cusBuy(id):
     if checkLoginStatus(id) == True:    
         if request.method == 'POST':
+            cursor.execute('SELECT money from userInfo where userID={id}'.format(id=id))
+            money = cursor.fetchall()
+            print(money)
             sql = 'insert into payment(payAmount,userID) values ({amount}, {id})'
             cursor.execute(sql.format(amount=ShoppingCart.total, id=id))
             connection.commit()
