@@ -30,6 +30,7 @@
       {% endfor %}
     </tbody>
 </table>
+Total: $ {{amount}}
 <div class="fill-in">
   {% for info in user %}
   <form action="/customer/{{info.userID}}/uploadDocument/submit" method="post" enctype="multipart/form-data">

@@ -47,6 +47,15 @@
                 <input type="submit" value="Upload" />
             </form>
         </div>
+    </br>
+    <div class="fill-in">
+        {% for info in user %}
+        <form action="/staff/{{info.userID}}/updateProduct/delete" method="post">
+        {% endfor %}
+            <input type="hidden" name="prodID" value="{{items.prodID}}">
+            <input type="submit" value="delete" />
+        </form>
+    </div>
     </div>
 </div>
 {% endfor %}  

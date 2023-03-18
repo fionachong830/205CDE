@@ -32,8 +32,7 @@ connection = pymysql.connect(host = 'localhost',
 cursor = connection.cursor()
 
 def initial(id):
-    cursor.execute("SELECT * FROM product")
-    product = cursor.fetchall()
+    product = getProduct()
     for e in product:
         cart.append(ShoppingCart(id, e['prodID'], e['productName'], 0, e['prodPrice']))    
 
@@ -47,6 +46,11 @@ def checkLoginStatus(id):
         else: 
             return False
 
+def getProduct():
+    cursor.execute("SELECT * FROM product WHERE deletedInd='N'")
+    product = cursor.fetchall()
+    return product 
+        
 def updateStatus():
     cursor.execute('UPDATE subscription SET subStatus="Expired" WHERE subEnd < curdate()')
     connection.commit()
@@ -151,8 +155,7 @@ def password():
         
 @app.route("/product")
 def productGuest():
-    cursor.execute("SELECT * FROM product")
-    product = cursor.fetchall()
+    product = getProduct()
     return render_template('productGuest.html', product=product)
 
 @app.route("/<int:id>/logout", methods=['GET'])
@@ -170,12 +173,11 @@ def cusDashboard(id):
         sql = '''    
         select *, DATEDIFF(subscription.subEnd, CURDATE()) as remaining 
         from product, subscription, userInfo
-        where product.prodID=subscription.prodID and userInfo.userID=subscription.userID and userInfo.userID={id}
+        where product.prodID=subscription.prodID and userInfo.userID=subscription.userID and userInfo.userID={id} and product.deletedInd='N'
         '''
         cursor.execute(sql.format(id=id))
         data = cursor.fetchall()
-        cursor.execute("SELECT * FROM product")
-        product = cursor.fetchall()
+        product = getProduct()
         user = getUserInfo(id)
         if request.method == 'POST':
             prodID = request.form['prodID']
@@ -207,8 +209,7 @@ def cusDashboardDetails(id, prodid):
 @app.route("/customer/<int:id>/product", methods=['POST', 'GET'])
 def cusProduct(id):
     if checkLoginStatus(id) == True:    
-        cursor.execute("SELECT * FROM product")
-        product = cursor.fetchall()
+        product = getProduct()
         user = getUserInfo(id)
         if request.method == 'POST':
             prodID = request.form['prodID']
@@ -227,21 +228,89 @@ def cusBuy(id):
         if request.method == 'POST':
             cursor.execute('SELECT money from userInfo where userID={id}'.format(id=id))
             money = cursor.fetchall()
-            for x in money:
-                print(x['money'])
-            sql = 'insert into payment(payAmount,userID) values ({amount}, {id})'
-            cursor.execute(sql.format(amount=ShoppingCart.total, id=id))
-            connection.commit()
-            cursor.execute("SELECT payID FROM payment ORDER BY payID DESC LIMIT 1")
-            payInfo=cursor.fetchall()
-            for e in payInfo:
-                payID = e['payID']
-                for e in cart:
-                    if e.cid == id:
-                        if e.count != 0:
-                            sql = 'insert into subHistory(subHDay, payID, subAmount,userID, prodID) values({subHDay}, {payID}, {subAmount}, {userID}, {prodID});'
-                            cursor.execute(sql.format(subHDay=e.count, payID=payID, subAmount=e.subtotal(), userID=id, prodID=e.id))
+            for a in money:
+                x = a["money"]
+                if x >= 0:
+                    if x >= ShoppingCart.total:
+                        amount = 0
+                        sql = 'insert into payment(payAmount,userID,payStatus,confirmDate) values ({amount}, {id}, "Approved",curdate())'
+                        cursor.execute(sql.format(amount=ShoppingCart.total, id=id))
+                        connection.commit()
+                        cursor.execute("SELECT payID FROM payment ORDER BY payID DESC LIMIT 1")
+                        payInfo=cursor.fetchall()
+                        for e in payInfo:
+                            payID = e['payID']
+                            for e in cart:
+                                if e.cid == id:
+                                    if e.count != 0:
+                                        sql = 'insert into subHistory(subHDay, payID, subAmount,userID,prodID,subHstatus) values({subHDay}, {payID}, {subAmount}, {userID}, {prodID},"Approved");'
+                                        cursor.execute(sql.format(subHDay=e.count, payID=payID, subAmount=e.subtotal(), userID=id, prodID=e.id))
+                                        connection.commit()
+                            sql = 'UPDATE userInfo SET money={money} WHERE userID={id}'
+                            cursor.execute(sql.format(money=(x-ShoppingCart.total), id=id))
                             connection.commit()
+                            sql = 'SELECT * FROM subHistory WHERE payID={payID}'
+                            cursor.execute(sql.format(payID=payID))
+                            sub = cursor.fetchall()
+                            for e in sub:
+                                sql = 'SELECT * FROM subscription WHERE userID={id} AND prodID={prodID}'
+                                cursor.execute(sql.format(prodID=e['prodID'], id=e['userID']))
+                                current = cursor.fetchall()
+                                if current == ():
+                                    sql = 'UPDATE subHistory SET subHStart=curdate(), subHEnd=DATE_ADD(curdate(), INTERVAL subHDay DAY) WHERE subHID={subHID}'
+                                    cursor.execute(sql.format(subHID=e['subHID']))
+                                    connection.commit()
+                                    sql = "INSERT INTO subscription(subStart, subEnd, subStatus, userID, prodID) VALUES (curdate(), DATE_ADD(curdate(), INTERVAL {days} DAY), 'Ongoing', {id}, {prodID})"
+                                    cursor.execute(sql.format(days=e['subHDay'], id=e['userID'], prodID=e['prodID']))
+                                    connection.commit()
+                                else:
+                                    for c in current:
+                                        if c['subStatus'] == 'Expired':
+                                            sql = 'UPDATE subHistory SET subHStart=curdate(), subHEnd=DATE_ADD(curdate(), INTERVAL subHDay DAY) WHERE subHID={subHID}'
+                                            cursor.execute(sql.format(subHID=e['subHID']))
+                                            connection.commit()
+                                            sql = 'UPDATE subscription SET subStart=curdate(), subEnd=DATE_ADD(curdate(), INTERVAL {days} DAY), subStatus="Ongoing" WHERE subID={subID}'
+                                            cursor.execute(sql.format(days=e['subHDay'] , subID=c['subID']))
+                                            connection.commit()
+                                        elif c['subStatus'] == 'Ongoing':
+                                            sql = 'UPDATE subHistory SET subHStart="{subEnd}", subHEnd=DATE_ADD("{subEnd}", INTERVAL {days} DAY) WHERE subHID={subHID}'
+                                            cursor.execute(sql.format(days=e['subHDay'], subHID=e['subHID'], subEnd=c['subEnd']))
+                                            connection.commit()
+                                            sql = 'UPDATE subscription SET subEnd=DATE_ADD("{subEnd}", INTERVAL {days} DAY), subStatus="Ongoing" WHERE subID={subID}'
+                                            cursor.execute(sql.format(days=e['subHDay'] , subID=c['subID'], subEnd=c['subEnd']))
+                                            connection.commit()                        
+                    else:
+                        amount=ShoppingCart.total-x
+                        sql = 'insert into payment(payAmount,userID) values ({amount}, {id})'
+                        cursor.execute(sql.format(amount=amount, id=id))
+                        connection.commit()        
+                        cursor.execute("SELECT payID FROM payment ORDER BY payID DESC LIMIT 1")
+                        payInfo=cursor.fetchall()
+                        for e in payInfo:
+                            payID = e['payID']
+                            for e in cart:
+                                if e.cid == id:
+                                    if e.count != 0:
+                                        sql = 'insert into subHistory(subHDay, payID, subAmount,userID, prodID) values({subHDay}, {payID}, {subAmount}, {userID}, {prodID});'
+                                        cursor.execute(sql.format(subHDay=e.count, payID=payID, subAmount=e.subtotal(), userID=id, prodID=e.id))
+                                        connection.commit() 
+                        sql = 'UPDATE userInfo SET money={money} WHERE userID={id}'
+                        cursor.execute(sql.format(money=0, id=id))
+                else:
+                    amount = ShoppingCart.total
+                    sql = 'insert into payment(payAmount,userID) values ({amount}, {id})'
+                    cursor.execute(sql.format(amount=amount, id=id))
+                    connection.commit()
+                    cursor.execute("SELECT payID FROM payment ORDER BY payID DESC LIMIT 1")
+                    payInfo=cursor.fetchall()
+                    for e in payInfo:
+                        payID = e['payID']
+                        for e in cart:
+                            if e.cid == id:
+                                if e.count != 0:
+                                    sql = 'insert into subHistory(subHDay, payID, subAmount,userID, prodID) values({subHDay}, {payID}, {subAmount}, {userID}, {prodID});'
+                                    cursor.execute(sql.format(subHDay=e.count, payID=payID, subAmount=e.subtotal(), userID=id, prodID=e.id))
+                                    connection.commit()
             for e in cart:
                 e.clear()
             sql = '''    
@@ -251,10 +320,9 @@ def cusBuy(id):
             cursor.execute(sql.format(pid=payID))
             data = cursor.fetchall()   
             user = getUserInfo(id)
-            return render_template('cusUploadDocumentDetails.html', data=data, user=user)
+            return render_template('cusUploadDocumentDetails.html', data=data, user=user, amount=amount)
         else: 
-            cursor.execute("SELECT * FROM product")
-            product = cursor.fetchall()
+            product = getProduct()
             user = getUserInfo(id)
             return render_template('cusProduct.html', product=product, user=user)
     else: 
@@ -306,7 +374,7 @@ def cusUploadDocumentSubmit(id):
             connection.commit()
         sql = '''    
         select * from payment
-        where userID={id}
+        where userID={id} and payStatus != "Approved"
         '''
         cursor.execute(sql.format(id=id))
         data = cursor.fetchall() 
@@ -320,6 +388,11 @@ def cusSubscriptionDetails(id, pid):
         if request.method == 'POST':
             payID = request.form['payID']  
             payDoc = request.form['payDoc']
+        sql = 'SELECT payAmount FROM payment WHERE payID={pid}'
+        cursor.execute(sql.format(pid=pid))
+        payAmount = cursor.fetchall() 
+        for x in payAmount:
+            amount = x['payAmount']
         sql = '''    
         select * from subHistory, product, payment
         where product.prodID=subHistory.prodID and subHistory.payID=payment.payID and payment.payID={pid}
@@ -327,7 +400,7 @@ def cusSubscriptionDetails(id, pid):
         cursor.execute(sql.format(pid=pid))
         data = cursor.fetchall()   
         user = getUserInfo(id)
-        return render_template('cusUploadDocumentDetails.html', data=data, user=user)
+        return render_template('cusUploadDocumentDetails.html', data=data, user=user, amount=amount)
     
 @app.route("/customer/<int:id>/shoppingCart", methods=['POST', 'GET'])
 def cusShoppingCart(id):
@@ -348,7 +421,6 @@ def cusShoppingCart(id):
                     list.append(e)
                     x += 1 
         total = ShoppingCart.total
-        cursor.execute("SELECT * FROM product")
         if x == 0:
             return render_template('cusShoppingCart.html', user=user, status='Empty')
         else:
@@ -408,8 +480,7 @@ def cusChangePassword(id):
 def cusHelpSupport(id):
     if checkLoginStatus(id) == True:
         user = getUserInfo(id)
-        cursor.execute("SELECT * FROM product")
-        product = cursor.fetchall()
+        product = getProduct()
         sql = '''    
         select * from subHistory where userID={id}
         '''
@@ -439,19 +510,18 @@ def staffDashboard(id):
         sql = '''    
         select *, DATEDIFF(subscription.subEnd, CURDATE()) as remaining 
         from product, subscription, userInfo
-        where product.prodID=subscription.prodID and userInfo.userID=subscription.userID
+        where product.prodID=subscription.prodID and userInfo.userID=subscription.userID and product.deletedInd='N'
         '''
         cursor.execute(sql)
         data = cursor.fetchall()
-        cursor.execute("SELECT * FROM product")
-        product = cursor.fetchall()
+        product = getProduct()
         user = getUserInfo(id)
         return render_template('staffDashboard.html', product=product, data=data, user=user)
     else: 
         return render_template('404.html'), 404
 
 @app.route("/staff/<int:id>/dashboard/<int:cid>/<int:prodid>", methods=['GET'])
-def  staffDashboardDetails(id, prodid, cid):
+def staffDashboardDetails(id, prodid, cid):
     if checkLoginStatus(id) == True:
         sql = '''    
         select * from subHistory, product, payment
@@ -467,13 +537,42 @@ def  staffDashboardDetails(id, prodid, cid):
         return render_template('staffDashboardDetails.html', data=data, user=user, prodName=prodName, cusName=cusName)
     else: 
         return render_template('404.html'), 404
-  
+
+@app.route("/staff/<int:id>/buy", methods=['GET', 'POST'])
+def staffExtend(id):
+    if checkLoginStatus(id) == True:
+        if request.method == 'POST':
+            userID = request.form['userID']
+            prodID = request.form['prodID']
+            days = request.form['days']
+            sql = 'SELECT * FROM subscription WHERE userID={id} AND prodID={prodID}'
+            cursor.execute(sql.format(prodID=prodID, id=userID))
+            current = cursor.fetchall()
+            for x in current:
+                if x['subStatus'] == 'Expired':
+                    sql = 'UPDATE subscription SET subStart=curdate(), subEnd=DATE_ADD(curdate(), INTERVAL {days} DAY), subStatus="Ongoing" WHERE subID={subID}'
+                    cursor.execute(sql.format(days=days , subID=x['subID']))
+                    connection.commit()
+                elif x['subStatus'] == 'Ongoing':
+                    sql = 'UPDATE subscription SET subEnd=DATE_ADD("{subEnd}", INTERVAL {days} DAY), subStatus="Ongoing" WHERE subID={subID}'
+                    cursor.execute(sql.format(days=days , subID=x['subID'], subEnd=x['subEnd']))
+                    connection.commit()
+        sql = '''    
+        select *, DATEDIFF(subscription.subEnd, CURDATE()) as remaining 
+        from product, subscription, userInfo
+        where product.prodID=subscription.prodID and userInfo.userID=subscription.userID
+        '''
+        cursor.execute(sql)
+        data = cursor.fetchall()
+        product = getProduct()
+        user = getUserInfo(id)
+        return render_template('staffDashboard.html', product=product, data=data, user=user)
+
 @app.route("/staff/<int:id>/updateProduct", methods=['GET'])
 def staffUpdateProduct(id):
     if checkLoginStatus(id) == True:
         user = getUserInfo(id)
-        cursor.execute("SELECT * FROM product")
-        product = cursor.fetchall()
+        product = getProduct()
         return render_template('staffUpdateProduct.html', user=user, product=product, status=None)
     else: 
         return render_template('404.html'), 404
@@ -482,8 +581,6 @@ def staffUpdateProduct(id):
 def staffUpdateProductSubmit(id):
     if checkLoginStatus(id) == True:
         user = getUserInfo(id)
-        UPLOAD_FOLDER = '/Users/fionachong/Library/CloudStorage/OneDrive-個人/2223 Sem2/205CDE/205CDE VS/tryflask/static/product'
-        UPLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\product")
         app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         if request.method == 'POST':
             prodID = request.form['prodID']
@@ -495,14 +592,12 @@ def staffUpdateProductSubmit(id):
             existingName = cursor.fetchall()
             for e in existingName:
                 if e['productName'] == productName:
-                    cursor.execute("SELECT * FROM product")
-                    product = cursor.fetchall()
+                    product = getProduct()
                     return render_template('staffUpdateProduct.html', user=user, product=product, status='namedup')
             sql = 'UPDATE product SET productName="{productName}", prodDescr="{prodDescr}", prodLink="{prodLink}",prodPrice="{prodPrice}" WHERE prodID={prodID}'
             cursor.execute(sql.format(prodID=prodID, productName=productName, prodDescr=prodDescr, prodLink=prodLink, prodPrice=prodPrice))
             connection.commit()
-        cursor.execute("SELECT * FROM product")
-        product = cursor.fetchall()
+        product = getProduct()
         return render_template('staffUpdateProduct.html', user=user, product=product, status='success')
     else: 
         return render_template('404.html'), 404
@@ -521,12 +616,43 @@ def staffUpdateProductSubmitPic(id):
             sql = 'UPDATE product SET prodImg="{prodImg}" WHERE prodID={prodID}'
             cursor.execute(sql.format(prodID=prodID, prodImg=prodImg.filename))
             connection.commit()
-        cursor.execute("SELECT * FROM product")
-        product = cursor.fetchall()
+        product = getProduct()
         return render_template('staffUpdateProduct.html', user=user, product=product, status='success')
     else: 
         return render_template('404.html'), 404
-    
+
+@app.route("/staff/<int:id>/updateProduct/delete", methods=['POST', 'GET'])
+def staffUpdateProductDelete(id):
+    if checkLoginStatus(id) == True:
+        user = getUserInfo(id)
+        if request.method == 'POST':
+            prodID = request.form['prodID']
+            sql = 'SELECT prodPrice FROM product WHERE prodID={prodID}'
+            cursor.execute(sql.format(prodID=prodID))
+            prodPrice = cursor.fetchall()
+            for e in prodPrice:
+                price = e['prodPrice']
+            sql = 'SELECT *, DATEDIFF(subscription.subEnd, CURDATE()) as remaining FROM subscription WHERE prodID={prodID}'
+            cursor.execute(sql.format(prodID=prodID))
+            data = cursor.fetchall()
+            for e in data:
+                print( e['remaining'])
+                if e['remaining'] > 0:
+                    sql = 'UPDATE userInfo SET money=(money+{refund}) WHERE userID={userID}'
+                    cursor.execute(sql.format(userID=e["userID"], refund=(e["remaining"]*price)))
+                    connection.commit()
+            sql = 'UPDATE product SET deletedInd="Y" WHERE prodID={prodID}'
+            cursor.execute(sql.format(prodID=prodID))
+            sql = 'UPDATE subhistory SET subHstatus="Refunded" WHERE prodID={prodID}'
+            cursor.execute(sql.format(prodID=prodID))
+            sql = 'UPDATE subscription SET subStatus="Expired", subEnd=curdate() WHERE prodID={prodID}'
+            cursor.execute(sql.format(prodID=prodID))
+            connection.commit()
+        product = getProduct()
+        return render_template('staffUpdateProduct.html', user=user, product=product, status='success')
+    else: 
+        return render_template('404.html'), 404
+
 @app.route("/staff/<int:id>/addProduct", methods=['GET'])
 def staffAddProduct(id):
     if checkLoginStatus(id) == True:
@@ -557,8 +683,7 @@ def staffAddProductSubmit(id):
             sql = 'INSERT INTO product(productName,prodDescr, prodLink, prodPrice, prodImg) VALUES ("{productName}", "{prodDescr}", "{prodLink}", {prodPrice}, "{prodImg}")'
             cursor.execute(sql.format(productName=productName, prodDescr=prodDescr, prodLink=prodLink, prodPrice=prodPrice, prodImg=prodImg.filename))
             connection.commit()
-        cursor.execute("SELECT * FROM product")
-        product = cursor.fetchall()
+        product = getProduct()
         return render_template('staffAddProduct.html', user=user, status='success')
     else: 
         return render_template('404.html'), 404
@@ -624,10 +749,10 @@ def staffApproverCornerSubmit(id):
                             cursor.execute(sql.format(days=e['subHDay'] , subID=x['subID']))
                             connection.commit()
                         elif x['subStatus'] == 'Ongoing':
-                            sql = 'UPDATE subHistory SET subHStart=DATE_ADD("{subEnd}", INTERVAL 1 DAY), subHEnd=DATE_ADD("{subEnd}", INTERVAL {days}+1 DAY) WHERE subHID={subHID}'
+                            sql = 'UPDATE subHistory SET subHStart="{subEnd}", subHEnd=DATE_ADD("{subEnd}", INTERVAL {days} DAY) WHERE subHID={subHID}'
                             cursor.execute(sql.format(days=e['subHDay'], subHID=e['subHID'], subEnd=x['subEnd']))
                             connection.commit()
-                            sql = 'UPDATE subscription SET subEnd=DATE_ADD("{subEnd}", INTERVAL {days}+1 DAY), subStatus="Ongoing" WHERE subID={subID}'
+                            sql = 'UPDATE subscription SET subEnd=DATE_ADD("{subEnd}", INTERVAL {days} DAY), subStatus="Ongoing" WHERE subID={subID}'
                             cursor.execute(sql.format(days=e['subHDay'] , subID=x['subID'], subEnd=x['subEnd']))
                             connection.commit()
         cursor.execute('select * from payment where payDoc is not null and payStatus != "Approved"')
