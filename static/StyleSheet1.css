@@ -4,16 +4,18 @@
 * {
     margin: 0;
     padding: 0;
+    border: 10px;
     font-family: 'Roboto Slab', serif;
 }
 
-h2{
+h2, h4{
     font-family: 'Sofia Sans Extra Condensed', sans-serif;
+    padding: 5px;
 }
 
 .content{
     padding: 0px 0px 0px 5px;
-    width: 96%;
+    width: 102%;
     margin: 0;
 }
 
@@ -118,14 +120,14 @@ table th{
 }
 
 .demo_pic_small {
-    width: 400px;
+    width: 600px;
     height: auto;
     float: left;
     margin: 0 1em 1em 0;
 }
 
 .demo_pic_big {
-    width: 600px;
+    width: 800px;
     height: auto;
     float: center;
     margin: 0 1em 1em 0;
@@ -325,13 +327,13 @@ nav ul {
     right: 0;
     bottom: 0;
     left: 0;
-    width: 50%;
+    width: 60%;
     margin: auto;
     overflow: auto;
     background: #fff;
     border-radius: 5px;
     padding: 1em 2em;
-    height: 50%;
+    height:fit-content;
     text-align: center;
 }
 

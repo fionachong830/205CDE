@@ -54,8 +54,15 @@
             function toggleMenu() {
                 subMenu.classList.toggle("open-menu");
             }
-            function edit(x) {
-                let message = prompt("Please input the updated information",x)
+
+            function confirmFunction(){
+                let text;
+                if (confirm("Are you sure to confirm?") == true) {
+                    text = "Please upload the payment document in the upload document page.";
+                } else {
+                    text = "Canceled";
+                }
+                document.getElementById("message").innerHTML = text;
             }
         </script>
         {% block script %}{% endblock %} 

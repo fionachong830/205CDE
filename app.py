@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_bootstrap import Bootstrap
 import pymysql
 import os
@@ -9,16 +9,16 @@ from ShoppingCart import ShoppingCart
 
 app = Flask(__name__)
 cart=[]
-app.config.update(
-    DEBUG=False,
-    MAIL_SERVER='smtp.gmail.com',
-    MAIL_PORT=465,
-    MAIL_USE_SSL=True,
-    MAIL_DEFAULT_SENDER=('admin', os.environ.get('MAIL_USERNAME')),
-    MAIL_MAX_EMAILS=10,
-    MAIL_USERNAME=os.environ.get('MAIL_USERNAME') ,
-    MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD')
-)
+
+app.config['SECRET_KEY'] = 'top-secret!'
+app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'apikey'
+app.config['MAIL_PASSWORD'] = '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'
+''''os.environ.get('SENDGRID_API_KEY')'''
+app.config['MAIL_DEFAULT_SENDER'] = 'testingtestinguat2@gmail.com'
+os.environ.get('MAIL_DEFAULT_SENDER')
 mail = Mail(app)
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
@@ -30,6 +30,14 @@ connection = pymysql.connect(host = 'localhost',
     local_infile = 1,
     cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
+
+def sendemail(email, subject, message):
+    msg = Message(
+        subject=subject,
+        recipients=[email],
+        html=message
+        )
+    mail.send(msg)    
 
 def initial(id):
     product = getProduct()
@@ -143,12 +151,7 @@ def password():
             subject = 'Forget password'
             message = 'Your Username: {username} <br> <br>' \
                 'Your Password: {password}<br> <br>'. format(username=i['userName'] , password=i['password'] )
-            msg = Message(
-                subject=subject,
-                recipients=[email],
-                html=message
-            )
-            mail.send(msg)
+            sendemail(email, subject, message)
             return render_template('forgotPassword.html', status='sent')  
         else: 
             return render_template('forgotPassword.html', status='fail')
