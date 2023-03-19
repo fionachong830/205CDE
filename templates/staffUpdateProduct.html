@@ -14,11 +14,11 @@
     {% endfor %}  
 </div>
 {% for items in product %}
-<input class="modal-state" id="{{items.productName}}" type="checkbox" />
-<div class="modal">
-    <label class="modal__bg" for="{{items.productName}}"></label>
-    <div class="modal__inner">
-        <label class="modal__close" for="{{items.productName}}"></label>
+<input class="modal-state_cus" id="{{items.productName}}" type="checkbox" />
+<div class="modal_cus">
+    <label class="modal__bg_cus" for="{{items.productName}}"></label>
+    <div class="modal__inner_cus">
+        <label class="modal__close_cus" for="{{items.productName}}"></label>
         <h2>{{items.productName}}</h2>
         <div class="fill-in">
             {% for info in user %}

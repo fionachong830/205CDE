@@ -167,6 +167,7 @@ def logout(id):
     cursor.execute(sql.format(id=id))
     connection.commit()
     cart = []
+    print(cart)
     return render_template('login.html')
 
 "Customer app route"
@@ -182,6 +183,7 @@ def cusDashboard(id):
         data = cursor.fetchall()
         product = getProduct()
         user = getUserInfo(id)
+        print(cart)
         if request.method == 'POST':
             prodID = request.form['prodID']
             days = request.form['days']
@@ -584,7 +586,6 @@ def staffUpdateProduct(id):
 def staffUpdateProductSubmit(id):
     if checkLoginStatus(id) == True:
         user = getUserInfo(id)
-        app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         if request.method == 'POST':
             prodID = request.form['prodID']
             productName = request.form['productName']

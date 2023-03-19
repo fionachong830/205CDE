@@ -38,11 +38,11 @@
 Nothing in Cart
 {% endif %} 
 {% for items in list %}
-    <input class="modal-state" id="{{items.name}}" type="checkbox" />
-    <div class="modal">
-        <label class="modal__bg" for="{{items.name}}"></label>
-        <div class="modal__inner">
-            <label class="modal__close" for="{{items.name}}"></label>
+    <input class="modal-state_cus" id="{{items.name}}" type="checkbox" />
+    <div class="modal_cus">
+        <label class="modal__bg_cus" for="{{items.name}}"></label>
+        <div class="modal__inner_cus">
+            <label class="modal__close_cus" for="{{items.name}}"></label>
             <h2>{{items.name}}</h2>
             <div class="fill-in">
               {% for info in user %}

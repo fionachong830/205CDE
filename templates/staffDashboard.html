@@ -32,11 +32,11 @@
         </tbody>
     </table>
     {% for items in data %}
-    <input class="modal-state" id="{{items.productName}}.{{items.userID}}" type="checkbox" />
+    <input class="modal-state_cus" id="{{items.productName}}.{{items.userID}}" type="checkbox" />
     <div class="modal">
-        <label class="modal__bg" for="{{items.productName}}.{{items.userID}}"></label>
-        <div class="modal__inner">
-            <label class="modal__close" for="{{items.productName}}.{{items.userID}}"></label>
+        <label class="modal__bg_cus" for="{{items.productName}}.{{items.userID}}"></label>
+        <div class="modal__inner_cus">
+            <label class="modal__close_cus" for="{{items.productName}}.{{items.userID}}"></label>
             <h2>Route System for {{items.userName}} ({{items.userID}})</h2>
             <div class="fill-in">    
                 {% for info in user%}

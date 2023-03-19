@@ -29,7 +29,7 @@ class ShoppingCart:
         ShoppingCart.total = 0
 
     def subtotal(self):
-        return int(self.count*self.price)
+        return float(self.count*self.price)
     
     def display(self):
         x = ("<td>"+self.name+"</td><td>"+str(self.count)+"</td><td>"+str(self.price)+"</td><td>"+str(self.count*self.price)+"</td><td>"+ "<p><label class='btn' for='"+self.name+"'>Edit</label></p>"+"</td>")
