@@ -166,8 +166,6 @@ def logout(id):
     sql = 'UPDATE userInfo set loginStatus=0 where userID={id};'
     cursor.execute(sql.format(id=id))
     connection.commit()
-    cart = []
-    print(cart)
     return render_template('login.html')
 
 "Customer app route"

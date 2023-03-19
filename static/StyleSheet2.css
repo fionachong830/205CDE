@@ -1,6 +1,7 @@
 ﻿
 @import url('https://fonts.googleapis.com/css2?family=Sofia+Sans+Extra+Condensed&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500&display=swap');
+/*
 table  {
     border-collapse:collapse;
     border-spacing:0;
@@ -35,7 +36,13 @@ table th{
     text-align:center;
     vertical-align:middle
 }
+*/
 
+.smallLogo {
+    border-radius: 5px;
+    width: 25px;
+    height: auto;
+}
 .grid-container {
     display: grid;
     gap: 50px;
@@ -65,8 +72,10 @@ table th{
     margin: 0 1em 1em 0;
 }
 
+
 /* [Object] Modal For Header
  * =============================== */
+ /* 
 .header {
     width: 96%;
     min-height: 100vh;
@@ -93,11 +102,6 @@ nav {
     height: auto;
 }
 
-.smallLogo {
-    border-radius: 5px;
-    width: 25px;
-    height: auto;
-}
 .user-name {
     height: auto;
     width: 45px;
@@ -213,6 +217,7 @@ nav ul {
         font-weight: 600;
     }
 
+*/
 /* [Object] Modal For Popup screen
  * =============================== */
 .modal_cus {

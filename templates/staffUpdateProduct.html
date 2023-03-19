@@ -1,15 +1,19 @@
 ﻿{% extends "/bootstrap/baseStaff.html" %}
 {% block title %}Update Product{% endblock %}
 {% block content %}
-<h2>Update Product</h2><br>
+<h2 class="text-primary">Update Product</h2><br>
 {% for info in user%}
-<a href="/staff/{{info.userID}}/addProduct"> Add New Product </a>
+<div class="buttons">
+    <button type="button" class="btn bg-gradient-primary mt-4" onclick="window.location.href='/staff/{{info.userID}}/addProduct'">Add New Product</button>
+</div>
 {% endfor %}
 <div class="grid-container">
     {% for items in product %}
         <div class="grid-item">
             <img src="/static/product/{{items.prodImg}}" class="demo_pic_small" />
-            <p><label class="btn" for="{{items.productName}}">{{items.productName}}</label></p>
+            <div class="buttons">
+                <label for="{{items.productName}}" class="btn bg-gradient-primary mt-4">{{items.productName}}</label>
+            </div>
         </div>
     {% endfor %}  
 </div>

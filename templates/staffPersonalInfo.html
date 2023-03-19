@@ -1,7 +1,7 @@
 ﻿{% extends "/bootstrap/baseStaff.html" %}
 {% block title %}Personal Information{% endblock %}
 {% block content %}
-<h2>Edit Personal Information</h2><br>
+<h2 class="text-primary">Edit Personal Information</h2><br>
 {% for info in user%}
 <div class="fill-in">
     <form action="/customer/{{info.userID}}/personalInfo" method="post">
