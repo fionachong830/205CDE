@@ -55,7 +55,7 @@ def checkLoginStatus(id):
             return False
 
 def getProduct():
-    cursor.execute("SELECT * FROM product WHERE deletedInd='N'")
+    cursor.execute('SELECT * FROM product WHERE deletedInd="N"')
     product = cursor.fetchall()
     return product 
         
@@ -72,7 +72,7 @@ def getUserInfo(id):
 
 @app.route("/")
 def home():
-    return render_template('login.html')
+    return render_template('home.html')
 
 @app.route("/login", methods=['POST', 'GET'])
 def login():
