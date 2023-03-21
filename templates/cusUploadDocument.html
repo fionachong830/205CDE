@@ -44,12 +44,17 @@
           {% endfor %} 
         </select><br>
         <label for="payDoc">Upload Document</label>
-        <input type="file" name="payDoc" required> <br>
-        <input type="submit" value="Submit" />
+        <input type="file" name="payDoc"  required> <br>
+        <input type="submit" class="btn bg-gradient-primary mt-4" value="Submit" />
   </form>
+</div>
 </div>
 {% if status == 'success' %}
 Upload successfully
 {% endif %}
+{% if status == 'fail_status' %}
+The payment status is not ready for upload document
+{% endif %}
+</div>
 {% endblock %}
 

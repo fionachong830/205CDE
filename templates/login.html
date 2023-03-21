@@ -13,11 +13,11 @@
         <input type="text" name="userName" required> <br>
         <label for="password">Password</label>
         <input type="password" name="password" required> <br>
-        <input type="submit" value="Login"> <br>
-        <a href="/forgotPassword"> Forgot password </a> <br>
-        <a href="/signup"> Sign up </a> <br>
+        <input type="submit" class="btn bg-gradient-primary mt-4" value="Login"> <br>
     </form>
 </div>
+<a href="/forgotPassword"> Forgot password </a> <br>
+<a href="/signup"> Sign up </a>
 {% if status == 'fail' %}
 Your username or password is not correct.
 {% endif %}

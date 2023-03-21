@@ -37,7 +37,7 @@
                 <input type="number" step="0.1" name="prodPrice" value={{items.prodPrice}} required> <br>
                 <label for="url">URL of website</label>
                 <input type="url" name="prodLink" value="{{items.prodLink}}" required> <br>
-                <input type="submit" value="Update" />
+                <input type="submit" class="btn bg-gradient-primary mt-4" value="Update" />
             </form>
         </div>
     </br>
@@ -48,7 +48,7 @@
                 <input type="hidden" name="prodID" value="{{items.prodID}}">
                 <label for="picture">Picture</label>
                 <input type="file" name="prodImg" required> <br>
-                <input type="submit" value="Upload" />
+                <input type="submit" class="btn bg-gradient-primary mt-4" value="Upload" />
             </form>
         </div>
     </br>
@@ -57,7 +57,7 @@
         <form action="/staff/{{info.userID}}/updateProduct/delete" method="post">
         {% endfor %}
             <input type="hidden" name="prodID" value="{{items.prodID}}">
-            <input type="submit" value="delete" />
+            <input type="submit" class="btn bg-gradient-primary mt-4" value="delete" />
         </form>
     </div>
     </div>

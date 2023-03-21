@@ -45,9 +45,9 @@
 {% for info in user %}
 <form action="/customer/{{info.userID}}/buy" method="post">
 {% endfor %}
-<input type="submit" value="Confirm" />
+<input type="submit" class="btn bg-gradient-primary mt-4" value="Confirm" />
 </form>
-<button onclick="window.print()">Print this page</button>
+<button class="btn bg-gradient-primary mt-4" onclick="window.print()">Print this page</button>
 {% endif %} 
 
 {% if status == 'Empty' %}
@@ -67,7 +67,7 @@ Nothing in Cart
                     <input type="hidden" name="prodID" value={{items.id}}>
                     <label for="day">Days</label>
                     <input type="number" name="days" min="1" value={{items.count}} required /><br>
-                    <input type="submit" value="Save" />
+                    <input type="submit"class="btn bg-gradient-primary mt-4" value="Save" />
                 </form>
             </div>
         </div>
@@ -76,10 +76,4 @@ Nothing in Cart
 {% endblock %}
 
 {% block script %}
-<script>
-  function update(){
-    let route = Number(document.getElementById("RouteDays").value);
-    document.getElementById("RouteSubtotal").innerHTML="$"+route*1;
-  }
-</script>
 {% endblock %} 

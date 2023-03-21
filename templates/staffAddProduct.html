@@ -16,8 +16,7 @@
         <input type="url" name="prodLink" required> <br>
         <label for="prodImg">Picture</label>
         <input type="file" name="prodImg" required> <br>
-        <input type="submit" value="Submit"> <br>
-        <input type="button" value="Back" onclick="history.back()">
+        <input type="submit" class="btn bg-gradient-primary mt-4" value="Submit"> <br>
     </form>
 </div>
 {% if status == 'success' %}
@@ -26,4 +25,5 @@ Add successfully
 {% if status == 'namedup' %}
 Product Name duplicated.
 {% endif %}
-{% endblock %}
+<br><input type="button" class="btn bg-gradient-primary mt-4" value="Back" onclick="history.back()">
+{% endblock %} 

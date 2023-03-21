@@ -146,7 +146,6 @@ def password():
     cursor.execute(sql.format(email=email))
     result = cursor.fetchall()
     for i in result: 
-        print(i['phoneNo'])
         if int(i['phoneNo']) == int(phoneNo):   
             subject = 'Forget password'
             message = 'Your Username: {username} <br> <br>' \
@@ -163,9 +162,11 @@ def productGuest():
 
 @app.route("/<int:id>/logout", methods=['GET'])
 def logout(id):
+    global cart 
     sql = 'UPDATE userInfo set loginStatus=0 where userID={id};'
     cursor.execute(sql.format(id=id))
     connection.commit()
+    cart=[]
     return render_template('login.html')
 
 "Customer app route"
@@ -181,7 +182,6 @@ def cusDashboard(id):
         data = cursor.fetchall()
         product = getProduct()
         user = getUserInfo(id)
-        print(cart)
         if request.method == 'POST':
             prodID = request.form['prodID']
             days = request.form['days']
@@ -345,7 +345,7 @@ def cusSubscriptionHistory(id):
         return render_template('cusSubscriptionHistory.html', data=data, user=user)
 
 @app.route("/customer/<int:id>/uploadDocument", methods=['GET'])
-def cusUploadDocument(id):
+def cusUploadDocument(id): 
     if checkLoginStatus(id) == True:  
         sql = '''    
         select * from payment
@@ -361,27 +361,35 @@ def cusUploadDocument(id):
 @app.route("/customer/<int:id>/uploadDocument/submit", methods=['POST','GET'])
 def cusUploadDocumentSubmit(id):
     if checkLoginStatus(id) == True:  
-        UPLOAD_FOLDER = '/Users/fionachong/Library/CloudStorage/OneDrive-個人/2223 Sem2/205CDE/205CDE VS/tryflask/static/uploadDoc'
-        UPLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\uploadDoc")
+        PLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\uploadDoc")
+        UPLOAD_FOLDER = "/Users/fionachong/Library/CloudStorage/OneDrive-個人/2223 Sem2/205CDE/205CDE VS/tryflask/static/uploadDoc"
         app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         user = getUserInfo(id)
         if request.method == 'POST':
             payID = request.form['payID']  
             payDoc = request.files['payDoc']
-            payDoc.save(os.path.join(app.config['UPLOAD_FOLDER'], payDoc.filename))
-            sql = 'UPDATE payment SET payDoc="{doc}", payStatus="Pending for Approval" WHERE payID={payID}'
-            cursor.execute(sql.format(payID=payID, doc=payDoc.filename))
-            connection.commit()
-            sql = 'UPDATE subHistory SET subHstatus="Pending for Approval" WHERE payID={payID}'
+            sql = 'SELECT payStatus from payment where payID={payID}'
             cursor.execute(sql.format(payID=payID))
-            connection.commit()
+            status = cursor.fetchall() 
+            for e in status: 
+                if e['payStatus'] == 'Pending for Payment' or e['payStatus'] == 'Pending for Approval' or e['payStatus'] == 'Returned':
+                    payDoc.save(os.path.join(app.config['UPLOAD_FOLDER'], payDoc.filename))
+                    sql = 'UPDATE payment SET payDoc="{doc}", payStatus="Pending for Approval" WHERE payID={payID}'
+                    cursor.execute(sql.format(payID=payID, doc=payDoc.filename))
+                    connection.commit()
+                    sql = 'UPDATE subHistory SET subHstatus="Pending for Approval" WHERE payID={payID}'
+                    cursor.execute(sql.format(payID=payID))
+                    connection.commit()
+                    status='success'
+                else:
+                    status='fail_status'
         sql = '''    
         select * from payment
         where userID={id} and payStatus != "Approved"
         '''
         cursor.execute(sql.format(id=id))
         data = cursor.fetchall() 
-        return render_template('cusUploadDocument.html', data=data, user=user, status='success')
+        return render_template('cusUploadDocument.html', data=data, user=user, status=status)
     else: 
         return render_template('404.html'), 404
     
@@ -638,7 +646,6 @@ def staffUpdateProductDelete(id):
             cursor.execute(sql.format(prodID=prodID))
             data = cursor.fetchall()
             for e in data:
-                print( e['remaining'])
                 if e['remaining'] > 0:
                     sql = 'UPDATE userInfo SET money=(money+{refund}) WHERE userID={userID}'
                     cursor.execute(sql.format(userID=e["userID"], refund=(e["remaining"]*price)))
@@ -806,6 +813,26 @@ def staffAddAccount(id):
     else: 
         return render_template('staffAddAccount.html', user=user, status=None)
 
+@app.route("/staff/<int:id>/inquiry", methods=['POST', 'GET'])
+def staffInquiry(id):
+    if checkLoginStatus(id) == True: 
+        if request.method == 'POST':
+            inquiryID = request.form['inquiryID']
+            sql = 'UPDATE inquiry SET inquiryStatus="Closed", solvedBy={id} WHERE inquiryID={inquiryID}'
+            cursor.execute(sql.format(inquiryID=inquiryID, id=id))
+            connection.commit()        
+        sql = '''   
+        select * from inquiry, userInfo 
+        where inquiry.userID=userInfo.userID
+        order by inquiry.inquiryStatus
+        '''
+        cursor.execute(sql)
+        data = cursor.fetchall()   
+        user = getUserInfo(id)
+        return render_template('staffInquiry.html', data=data, user=user)
+    else: 
+        return render_template('404.html'), 404
+    
 @app.route("/staff/<int:id>/personalInfo", methods=['POST','GET'])
 def staffPersonalInfo(id):
     if checkLoginStatus(id) == True:
