@@ -368,8 +368,7 @@ def cusUploadDocumentSubmit(id):
             payDoc = request.files['payDoc']
             sql = 'SELECT payStatus from payment where payID={payID}'
             cursor.execute(sql.format(payID=payID))
-            paystatus = cursor.fetchall() 
-            payDoc.save(os.path.join(app.config['UPLOAD_FOLDER'], payDoc.filename))    
+            paystatus = cursor.fetchall()  
             for e in paystatus: 
                 if e['payStatus'] != "Approved":
                     payDoc.save(os.path.join(app.config['UPLOAD_FOLDER'], payDoc.filename))
@@ -392,7 +391,7 @@ def cusUploadDocumentSubmit(id):
     else: 
         return render_template('404.html'), 404
     
-@app.route("/customer/<int:id>/uploadDocument/<int:pid>", methods=['POST','GET'])
+@app.route("/customer/<int:id>/uploadDocument/<int:pid>", methods=['GET'])
 def cusSubscriptionDetails(id, pid):
     if checkLoginStatus(id) == True: 
         sql = 'SELECT payAmount FROM payment WHERE payID={pid}'
@@ -733,33 +732,34 @@ def staffApproverCornerSubmit(id):
             sql = 'SELECT * FROM subHistory WHERE payID={payID}'
             cursor.execute(sql.format(payID=payID))
             sub = cursor.fetchall()
-            for e in sub:
-                sql = 'SELECT * FROM subscription WHERE userID={id} AND prodID={prodID}'
-                cursor.execute(sql.format(prodID=e['prodID'], id=e['userID']))
-                current = cursor.fetchall()
-                if current == ():
-                    sql = 'UPDATE subHistory SET subHStart=curdate(), subHEnd=DATE_ADD(curdate(), INTERVAL subHDay DAY) WHERE subHID={subHID}'
-                    cursor.execute(sql.format(subHID=e['subHID']))
-                    connection.commit()
-                    sql = "INSERT INTO subscription(subStart, subEnd, subStatus, userID, prodID) VALUES (curdate(), DATE_ADD(curdate(), INTERVAL {days} DAY), 'Ongoing', {id}, {prodID})"
-                    cursor.execute(sql.format(days=e['subHDay'], id=e['userID'], prodID=e['prodID']))
-                    connection.commit()
-                else:
-                    for x in current:
-                        if x['subStatus'] == 'Expired':
-                            sql = 'UPDATE subHistory SET subHStart=curdate(), subHEnd=DATE_ADD(curdate(), INTERVAL subHDay DAY) WHERE subHID={subHID}'
-                            cursor.execute(sql.format(subHID=e['subHID']))
-                            connection.commit()
-                            sql = 'UPDATE subscription SET subStart=curdate(), subEnd=DATE_ADD(curdate(), INTERVAL {days} DAY), subStatus="Ongoing" WHERE subID={subID}'
-                            cursor.execute(sql.format(days=e['subHDay'] , subID=x['subID']))
-                            connection.commit()
-                        elif x['subStatus'] == 'Ongoing':
-                            sql = 'UPDATE subHistory SET subHStart="{subEnd}", subHEnd=DATE_ADD("{subEnd}", INTERVAL {days} DAY) WHERE subHID={subHID}'
-                            cursor.execute(sql.format(days=e['subHDay'], subHID=e['subHID'], subEnd=x['subEnd']))
-                            connection.commit()
-                            sql = 'UPDATE subscription SET subEnd=DATE_ADD("{subEnd}", INTERVAL {days} DAY), subStatus="Ongoing" WHERE subID={subID}'
-                            cursor.execute(sql.format(days=e['subHDay'] , subID=x['subID'], subEnd=x['subEnd']))
-                            connection.commit()
+            if status == "Approved":
+                for e in sub:
+                    sql = 'SELECT * FROM subscription WHERE userID={id} AND prodID={prodID}'
+                    cursor.execute(sql.format(prodID=e['prodID'], id=e['userID']))
+                    current = cursor.fetchall()
+                    if current == ():
+                        sql = 'UPDATE subHistory SET subHStart=curdate(), subHEnd=DATE_ADD(curdate(), INTERVAL subHDay DAY) WHERE subHID={subHID}'
+                        cursor.execute(sql.format(subHID=e['subHID']))
+                        connection.commit()
+                        sql = "INSERT INTO subscription(subStart, subEnd, subStatus, userID, prodID) VALUES (curdate(), DATE_ADD(curdate(), INTERVAL {days} DAY), 'Ongoing', {id}, {prodID})"
+                        cursor.execute(sql.format(days=e['subHDay'], id=e['userID'], prodID=e['prodID']))
+                        connection.commit()
+                    else:
+                        for x in current:
+                            if x['subStatus'] == 'Expired':
+                                sql = 'UPDATE subHistory SET subHStart=curdate(), subHEnd=DATE_ADD(curdate(), INTERVAL subHDay DAY) WHERE subHID={subHID}'
+                                cursor.execute(sql.format(subHID=e['subHID']))
+                                connection.commit()
+                                sql = 'UPDATE subscription SET subStart=curdate(), subEnd=DATE_ADD(curdate(), INTERVAL {days} DAY), subStatus="Ongoing" WHERE subID={subID}'
+                                cursor.execute(sql.format(days=e['subHDay'] , subID=x['subID']))
+                                connection.commit()
+                            elif x['subStatus'] == 'Ongoing':
+                                sql = 'UPDATE subHistory SET subHStart="{subEnd}", subHEnd=DATE_ADD("{subEnd}", INTERVAL {days} DAY) WHERE subHID={subHID}'
+                                cursor.execute(sql.format(days=e['subHDay'], subHID=e['subHID'], subEnd=x['subEnd']))
+                                connection.commit()
+                                sql = 'UPDATE subscription SET subEnd=DATE_ADD("{subEnd}", INTERVAL {days} DAY), subStatus="Ongoing" WHERE subID={subID}'
+                                cursor.execute(sql.format(days=e['subHDay'] , subID=x['subID'], subEnd=x['subEnd']))
+                                connection.commit()
         cursor.execute('select * from payment where payDoc is not null and payStatus != "Approved"')
         data = cursor.fetchall() 
         return render_template('staffApproverCorner.html', user=user, data=data)
