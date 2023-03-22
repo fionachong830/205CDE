@@ -33,7 +33,7 @@
                 </td>
                 <td class="align-middle">
                     <div class="buttons">
-                        <label for="{{items.payID}}" class="btn bg-gradient-primary mt-4">View</label>
+                        <label for="{{items.payDoc}}" class="btn bg-gradient-primary mt-4">View</label>
                     </div>
                  </td>
                 <td class="align-items-center text-sm">
@@ -55,16 +55,17 @@
                     </form>
                     {% endfor %}
                 </td>
+            </tr>
         {% endfor %}
         </tbody>
       </table> 
     </div>
 {% for items in data %}
-    <input class="modal-state_cus" id="{{items.payID}}" type="checkbox" />
+    <input class="modal-state_cus" id="{{items.payDoc}}" type="checkbox" />
     <div class="modal_cus">
-        <label class="modal__bg_cus" for="{{items.payID}}"></label>
+        <label class="modal__bg_cus" for="{{items.payDoc}}"></label>
         <div class="modal__inner_cus">
-            <label class="modal__close_cus" for="{{items.payID}}"></label>
+            <label class="modal__close_cus" for="{{items.payDoc}}"></label>
             <img src="/static/uploadDoc/{{items.payDoc}}" class="demo_pic_big" /><br clear="all">
         </div>
     </div>    

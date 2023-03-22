@@ -356,12 +356,11 @@ def cusUploadDocument(id):
         return render_template('cusUploadDocument.html', data=data, user=user, status=None)
     else: 
         return render_template('404.html'), 404
-
+    
 @app.route("/customer/<int:id>/uploadDocument/submit", methods=['POST','GET'])
 def cusUploadDocumentSubmit(id):
     if checkLoginStatus(id) == True:  
-        UPLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\uploadDoc")
-        UPLOAD_FOLDER = "/Users/fionachong/205CDE/static/uploadDoc"
+        UPLOAD_FOLDER = '/Users/fionachong/205CDE/static/uploadDoc'
         app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         user = getUserInfo(id)
         if request.method == 'POST':
@@ -396,9 +395,6 @@ def cusUploadDocumentSubmit(id):
 @app.route("/customer/<int:id>/uploadDocument/<int:pid>", methods=['POST','GET'])
 def cusSubscriptionDetails(id, pid):
     if checkLoginStatus(id) == True: 
-        if request.method == 'POST':
-            payID = request.form['payID']  
-            payDoc = request.form['payDoc']
         sql = 'SELECT payAmount FROM payment WHERE payID={pid}'
         cursor.execute(sql.format(pid=pid))
         payAmount = cursor.fetchall() 
