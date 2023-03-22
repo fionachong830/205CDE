@@ -104,8 +104,8 @@ def login():
 def signup():
     if request.method == 'POST':
         name = request.form['name']
-        phoneNo = request.form['phoneNo']
-        email = request.form['email']
+        phoneNo = request.form['phoneNo'].strip()
+        email = request.form['email'].strip()
         userName = request.form['userName']
         password = request.form['password']
         confirmPassword = request.form['confirmPassword']
@@ -115,7 +115,7 @@ def signup():
             for i in result:
                 if i['userName'] == userName:
                     return render_template('signup.html', status='usernamedup')
-                if i['phoneNo'] == phoneNo:
+                if int(i['phoneNo']) == int(phoneNo):
                     return render_template('signup.html', status='phoneNodup')
                 if i['email'] == email:
                     return render_template('signup.html', status='emaildup')                
@@ -142,18 +142,17 @@ def forgotPassword():
 def password():
     phoneNo = request.form['phoneNo'].strip()
     email = request.form['email'].strip()
-    sql = 'SELECT * from userInfo WHERE email="{email}"'
-    cursor.execute(sql.format(email=email))
+    cursor.execute('SELECT * from userInfo')
     result = cursor.fetchall()
     for i in result: 
         if int(i['phoneNo']) == int(phoneNo):   
-            subject = 'Forget password'
-            message = 'Your Username: {username} <br> <br>' \
-                'Your Password: {password}<br> <br>'. format(username=i['userName'] , password=i['password'] )
-            sendemail(email, subject, message)
-            return render_template('forgotPassword.html', status='sent')  
-        else: 
-            return render_template('forgotPassword.html', status='fail')
+            if i['email'] == email:
+                subject = 'Forget password'
+                message = 'Your Username: {username} <br> <br>' \
+                    'Your Password: {password}<br> <br>'. format(username=i['userName'] , password=i['password'] )
+                sendemail(email, subject, message)
+                return render_template('forgotPassword.html', status='sent')  
+    return render_template('forgotPassword.html', status='fail')
         
 @app.route("/product")
 def productGuest():
@@ -361,8 +360,8 @@ def cusUploadDocument(id):
 @app.route("/customer/<int:id>/uploadDocument/submit", methods=['POST','GET'])
 def cusUploadDocumentSubmit(id):
     if checkLoginStatus(id) == True:  
-        PLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\uploadDoc")
-        UPLOAD_FOLDER = "/Users/fionachong/Library/CloudStorage/OneDrive-個人/2223 Sem2/205CDE/205CDE VS/tryflask/static/uploadDoc"
+        UPLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\uploadDoc")
+        UPLOAD_FOLDER = "/Users/fionachong/205CDE/static/uploadDoc"
         app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         user = getUserInfo(id)
         if request.method == 'POST':
@@ -370,9 +369,10 @@ def cusUploadDocumentSubmit(id):
             payDoc = request.files['payDoc']
             sql = 'SELECT payStatus from payment where payID={payID}'
             cursor.execute(sql.format(payID=payID))
-            status = cursor.fetchall() 
-            for e in status: 
-                if e['payStatus'] == 'Pending for Payment' or e['payStatus'] == 'Pending for Approval' or e['payStatus'] == 'Returned':
+            paystatus = cursor.fetchall() 
+            payDoc.save(os.path.join(app.config['UPLOAD_FOLDER'], payDoc.filename))    
+            for e in paystatus: 
+                if e['payStatus'] != "Approved":
                     payDoc.save(os.path.join(app.config['UPLOAD_FOLDER'], payDoc.filename))
                     sql = 'UPDATE payment SET payDoc="{doc}", payStatus="Pending for Approval" WHERE payID={payID}'
                     cursor.execute(sql.format(payID=payID, doc=payDoc.filename))
@@ -616,8 +616,8 @@ def staffUpdateProductSubmit(id):
 def staffUpdateProductSubmitPic(id):
     if checkLoginStatus(id) == True:
         user = getUserInfo(id)
-        UPLOAD_FOLDER = '/Users/fionachong/Library/CloudStorage/OneDrive-個人/2223 Sem2/205CDE/205CDE VS/tryflask/static/product'
         UPLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\product")
+        UPLOAD_FOLDER = '/Users/fionachong/205CDE/static/product'
         app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         if request.method == 'POST':
             prodID = request.form['prodID']
@@ -674,8 +674,8 @@ def staffAddProduct(id):
 def staffAddProductSubmit(id):
     if checkLoginStatus(id) == True:
         user = getUserInfo(id)
-        UPLOAD_FOLDER = '/Users/fionachong/Library/CloudStorage/OneDrive-個人/2223 Sem2/205CDE/205CDE VS/tryflask/static/product'
         UPLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\product")
+        UPLOAD_FOLDER = '/Users/fionachong/205CDE/static/product'
         app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         if request.method == 'POST':
             productName = request.form['productName']

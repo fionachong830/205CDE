@@ -57,16 +57,17 @@
                 </td>
         {% endfor %}
         </tbody>
-      </table>
+      </table> 
+    </div>
 {% for items in data %}
     <input class="modal-state_cus" id="{{items.payID}}" type="checkbox" />
     <div class="modal_cus">
         <label class="modal__bg_cus" for="{{items.payID}}"></label>
         <div class="modal__inner_cus">
             <label class="modal__close_cus" for="{{items.payID}}"></label>
-            <h2>{{items.productName}}</h2>
             <img src="/static/uploadDoc/{{items.payDoc}}" class="demo_pic_big" /><br clear="all">
         </div>
     </div>    
 {% endfor %}
+</div>
 {% endblock %}
