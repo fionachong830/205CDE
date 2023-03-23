@@ -1,3 +1,5 @@
 {
-    "livePreview.defaultPreviewPath": "/templates/try/popup.html"
+    "livePreview.defaultPreviewPath": "/templates/try/popup.html",
+    "appService.defaultWebAppToDeploy": "/subscriptions/2c41442b-6c25-4cc7-96f6-e3d68869d04e/resourceGroups/msdocs-python-webapp-quickstart-205_group/providers/Microsoft.Web/sites/msdocs-python-webapp-quickstart-205",
+    "appService.deploySubpath": "."
 }
