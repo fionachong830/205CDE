@@ -23,13 +23,15 @@ mail = Mail(app)
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
 bootstrap = Bootstrap(app)
+
 connection = pymysql.connect(host = 'localhost', 
     user = 'root',
     password = 'fiona0830', 
     db = '205CDE', 
     local_infile = 1,
     cursorclass=pymysql.cursors.DictCursor)
-cursor = connection.cursor()
+
+cursor = connection.cursor() 
 
 def sendemail(email, subject, message):
     msg = Message(
