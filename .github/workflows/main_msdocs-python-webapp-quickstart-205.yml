@@ -24,8 +24,8 @@ jobs:
 
       - name: Create and start virtual environment
         run: |
-          python3 -m venv .venv
-          source .venv/bin/activate
+          python -m venv venv
+          source venv/bin/activate
       
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'msdocs-python-webapp-quickstart-205'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E12003E95BB54A7093B8062FD5E4F957 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DD18AFC99B7B46BB925B3C9E5D6FAB3C }}

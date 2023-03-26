@@ -1,37 +1,64 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_bootstrap import Bootstrap
-import pymysql
 import os
 from flask_mail import Mail, Message
-from distutils.log import debug
-from fileinput import filename
 from ShoppingCart import ShoppingCart
+from distutils.log import debug
+import pymysql
+from fileinput import filename
+import mysql.connector
+from mysql.connector import errorcode
+from azure.storage.fileshare import ShareServiceClient, ShareFileClient
+from azure.storage.blob import BlobServiceClient
 
 app = Flask(__name__)
 cart=[]
+
+connect_str = os.environ.get('BLOB_CONNECT_STR')
+# retrieve the connection string from the environment variable
+
+container_product = "product" # container name in which images will be store in the storage account
+
+blob_service_client_product = BlobServiceClient.from_connection_string(conn_str=connect_str) # create a blob service client to interact with the storage account
+try:
+    container_client_product = blob_service_client_product.get_container_client(container=container_product) # get container client to interact with the container in which images will be stored
+    container_client_product.get_container_properties() # get properties of the container to force exception to be thrown if container does not exist
+except Exception as e:
+    container_client_product = blob_service_client_product.create_container(container_product) # create a container in the storage account if it does not exist
+
+container_doc = "uploaddoc" # container name in which images will be store in the storage account
+
+blob_service_client_doc = BlobServiceClient.from_connection_string(conn_str=connect_str) # create a blob service client to interact with the storage account
+try:
+    container_client_doc = blob_service_client_doc.get_container_client(container=container_doc) # get container client to interact with the container in which images will be stored
+    container_client_doc.get_container_properties() # get properties of the container to force exception to be thrown if container does not exist
+except Exception as e:
+    container_client_doc = blob_service_client_doc.create_container(container_doc) # create a container in the storage account if it does not exist
 
 app.config['SECRET_KEY'] = 'top-secret!'
 app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'apikey'
-app.config['MAIL_PASSWORD'] = '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'
-''''os.environ.get('SENDGRID_API_KEY')'''
-app.config['MAIL_DEFAULT_SENDER'] = 'testingtestinguat2@gmail.com'
-os.environ.get('MAIL_DEFAULT_SENDER')
+app.config['MAIL_PASSWORD'] = os.environ.get('SENDGRID_API_KEY')
+app.config['MAIL_DEFAULT_SENDER'] = 'testingtestinguat1@gmail.com'
 mail = Mail(app)
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
 bootstrap = Bootstrap(app)
 
-connection = pymysql.connect(host = 'localhost', 
-    user = 'root',
-    password = 'fiona0830', 
-    db = '205CDE', 
-    local_infile = 1,
-    cursorclass=pymysql.cursors.DictCursor)
-
-cursor = connection.cursor() 
+try:
+   connection = pymysql.connect(user=os.environ.get('SQL_USERNAME'), password=os.environ.get('SQL_PASSWORD'), host=os.environ.get('SQL_HOST'), port=3306, database="205cde", ssl_ca=os.environ.get('SQL_SSL_CA'), ssl_disabled=False, local_infile = 1, cursorclass=pymysql.cursors.DictCursor)
+   print("Connection established")
+except mysql.connector.Error as err:
+  if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+    print("Something is wrong with the user name or password")
+  elif err.errno == errorcode.ER_BAD_DB_ERROR:
+    print("Database does not exist")
+  else:
+    print(err)
+else:
+  cursor = connection.cursor()
 
 def sendemail(email, subject, message):
     msg = Message(
@@ -358,29 +385,34 @@ def cusUploadDocument(id):
         return render_template('cusUploadDocument.html', data=data, user=user, status=None)
     else: 
         return render_template('404.html'), 404
-    
+
 @app.route("/customer/<int:id>/uploadDocument/submit", methods=['POST','GET'])
 def cusUploadDocumentSubmit(id):
     if checkLoginStatus(id) == True:  
-        UPLOAD_FOLDER = '/Users/fionachong/205CDE/static/uploadDoc'
-        app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         user = getUserInfo(id)
         if request.method == 'POST':
-            payID = request.form['payID']  
+            payID = request.form['payID']
             payDoc = request.files['payDoc']
+            filenames = ""            
             sql = 'SELECT payStatus from payment where payID={payID}'
             cursor.execute(sql.format(payID=payID))
             paystatus = cursor.fetchall()  
             for e in paystatus: 
                 if e['payStatus'] != "Approved":
-                    payDoc.save(os.path.join(app.config['UPLOAD_FOLDER'], payDoc.filename))
-                    sql = 'UPDATE payment SET payDoc="{doc}", payStatus="Pending for Approval" WHERE payID={payID}'
-                    cursor.execute(sql.format(payID=payID, doc=payDoc.filename))
-                    connection.commit()
-                    sql = 'UPDATE subHistory SET subHstatus="Pending for Approval" WHERE payID={payID}'
-                    cursor.execute(sql.format(payID=payID))
-                    connection.commit()
-                    status='success'
+                    for file in request.files.getlist("payDoc"):
+                        try:
+                            container_client_doc.upload_blob(file.filename, file) # upload the file to the container using the filename as the blob name
+                            filenames += file.filename + "<br /> "
+                            sql = 'UPDATE payment SET payDoc="{doc}", payStatus="Pending for Approval" WHERE payID={payID}'
+                            cursor.execute(sql.format(payID=payID, doc=payDoc.filename))
+                            connection.commit()
+                            sql = 'UPDATE subHistory SET subHstatus="Pending for Approval" WHERE payID={payID}'
+                            cursor.execute(sql.format(payID=payID))
+                            connection.commit()
+                            status='success'                            
+                        except Exception as e:
+                            print(e)
+                            print("Ignoring duplicate filenames") # ignore duplicate filenames              
                 else:
                     status='fail_status'
         sql = '''    
@@ -613,13 +645,16 @@ def staffUpdateProductSubmit(id):
 def staffUpdateProductSubmitPic(id):
     if checkLoginStatus(id) == True:
         user = getUserInfo(id)
-        UPLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\product")
-        UPLOAD_FOLDER = '/Users/fionachong/205CDE/static/product'
-        app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         if request.method == 'POST':
             prodID = request.form['prodID']
             prodImg = request.files['prodImg']
-            prodImg.save(os.path.join(app.config['UPLOAD_FOLDER'], prodImg.filename))
+            for file in request.files.getlist("prodImg"):
+                try:
+                    container_client_product.upload_blob(file.filename, file) # upload the file to the container using the filename as the blob name
+                    filenames += file.filename + "<br /> "
+                except Exception as e:
+                    print(e)
+                    print("Ignoring duplicate filenames") # ignore duplicate filenames  
             sql = 'UPDATE product SET prodImg="{prodImg}" WHERE prodID={prodID}'
             cursor.execute(sql.format(prodID=prodID, prodImg=prodImg.filename))
             connection.commit()
@@ -671,9 +706,6 @@ def staffAddProduct(id):
 def staffAddProductSubmit(id):
     if checkLoginStatus(id) == True:
         user = getUserInfo(id)
-        UPLOAD_FOLDER = (r"C:\Users\fiona\OneDrive\文件\GitHub\205CDE\static\product")
-        UPLOAD_FOLDER = '/Users/fionachong/205CDE/static/product'
-        app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
         if request.method == 'POST':
             productName = request.form['productName']
             prodDescr = request.form['prodDescr']
@@ -685,7 +717,13 @@ def staffAddProductSubmit(id):
             for e in existingName:
                 if e['productName'] == productName:
                     return render_template('staffAddProduct.html', user=user, status='namedup')
-            prodImg.save(os.path.join(app.config['UPLOAD_FOLDER'], prodImg.filename))
+            for file in request.files.getlist("prodImg"):
+                try:
+                    container_client_product.upload_blob(file.filename, file) # upload the file to the container using the filename as the blob name
+                    filenames += file.filename + "<br /> "
+                except Exception as e:
+                    print(e)
+                    print("Ignoring duplicate filenames") # ignore duplicate filenames   
             sql = 'INSERT INTO product(productName,prodDescr, prodLink, prodPrice, prodImg) VALUES ("{productName}", "{prodDescr}", "{prodLink}", {prodPrice}, "{prodImg}")'
             cursor.execute(sql.format(productName=productName, prodDescr=prodDescr, prodLink=prodLink, prodPrice=prodPrice, prodImg=prodImg.filename))
             connection.commit()
